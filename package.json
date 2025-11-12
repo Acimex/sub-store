@@ -1,0 +1,35 @@
+{
+  "name": "sub-store",
+  "version": "2.15.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:pages\" \"npm run dev:worker\"",
+    "dev:pages": "vite --config packages/pages/vite.config.ts",
+    "dev:worker": "wrangler dev --config packages/worker/wrangler.toml",
+    "build": "concurrently \"npm run build:pages\" \"npm run build:worker\"",
+    "build:pages": "tsc --project packages/pages/tsconfig.json && vite build --config packages/pages/vite.config.ts",
+    "build:worker": "wrangler build --config packages/worker/wrangler.toml",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write .",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "husky": "^8.0.3",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "wrangler": "^3.19.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
