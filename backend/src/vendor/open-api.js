@@ -6,39 +6,7 @@ const isNode = eval(`typeof process !== "undefined"`); // eval is needed in orde
 const isStash =
     'undefined' !== typeof $environment && $environment['stash-version'];
 const isShadowRocket = 'undefined' !== typeof $rocket;
-const isEgern = 'object' == typeof egern;
-const isLanceX = 'undefined' != typeof $native;
-const isGUIforCores = typeof $Plugins !== 'undefined';
-import { Base64 } from 'js-base64';
 
-function isPlainObject(obj) {
-    return (
-        obj !== null &&
-        typeof obj === 'object' &&
-        [null, Object.prototype].includes(Object.getPrototypeOf(obj))
-    );
-}
-
-function parseSocks5Uri(uri) {
-    // eslint-disable-next-line no-unused-vars
-    let [__, username, password, server, port, query, name] = uri.match(
-        /^socks5:\/\/(?:(.*?):(.*?)@)?(.*?)(?::(\d+?))?(\?.*?)?(?:#(.*?))?$/,
-    );
-    if (port) {
-        port = parseInt(port, 10);
-    } else {
-        $.error(`port is not present in line: ${uri}`);
-        throw new Error(`port is not present in line: ${uri}`);
-    }
-    return {
-        type: 5,
-        host: server,
-        port,
-
-        userId: username != null ? decodeURIComponent(username) : undefined,
-        password: password != null ? decodeURIComponent(password) : undefined,
-    };
-}
 export class OpenAPI {
     constructor(name = 'untitled', debug = false) {
         this.name = name;
@@ -47,10 +15,6 @@ export class OpenAPI {
         this.http = HTTP();
         this.env = ENV();
 
-        if (isNode) {
-            const dotenv = eval(`require("dotenv")`);
-            dotenv.config();
-        }
         this.node = (() => {
             if (isNode) {
                 const fs = eval("require('fs')");
@@ -82,73 +46,34 @@ export class OpenAPI {
             this.cache = JSON.parse($prefs.valueForKey(this.name) || '{}');
         if (isLoon || isSurge)
             this.cache = JSON.parse($persistentStore.read(this.name) || '{}');
-        if (isGUIforCores)
-            this.cache = JSON.parse(
-                $Plugins.SubStoreCache.get(this.name) || '{}',
-            );
+
         if (isNode) {
             // create a json for root cache
-            const basePath =
-                eval('process.env.SUB_STORE_DATA_BASE_PATH') || '.';
-            let rootPath = `${basePath}/root.json`;
-            const backupRootPath = `${basePath}/root_${Date.now()}.json`;
-
-            this.log(`Root path: ${rootPath}`);
-            if (this.node.fs.existsSync(rootPath)) {
-                try {
-                    this.root = JSON.parse(
-                        this.node.fs.readFileSync(`${rootPath}`),
-                    );
-                } catch (e) {
-                    this.node.fs.copyFileSync(rootPath, backupRootPath);
-                    this.error(
-                        `Failed to parse ${rootPath}: ${e.message}. Backup created at ${backupRootPath}`,
-                    );
-                }
+            let fpath = 'root.json';
+            if (!this.node.fs.existsSync(fpath)) {
+                this.node.fs.writeFileSync(
+                    fpath,
+                    JSON.stringify({}),
+                    { flag: 'wx' },
+                    (err) => console.log(err),
+                );
             }
-            if (!isPlainObject(this.root)) {
-                this.node.fs.writeFileSync(rootPath, JSON.stringify({}), {
-                    flag: 'w',
-                });
-                this.root = {};
-            }
+            this.root = {};
 
             // create a json file with the given name if not exists
-            let fpath = `${basePath}/${this.name}.json`;
-            const backupPath = `${basePath}/${this.name}_${Date.now()}.json`;
-
-            this.log(`Data path: ${fpath}`);
-            if (this.node.fs.existsSync(fpath)) {
-                try {
-                    this.cache = JSON.parse(
-                        this.node.fs.readFileSync(`${fpath}`, 'utf-8'),
-                    );
-                    if (!isPlainObject(this.cache))
-                        throw new Error('Invalid Data');
-                } catch (e) {
-                    try {
-                        const str = Base64.decode(
-                            this.node.fs.readFileSync(`${fpath}`, 'utf-8'),
-                        );
-                        this.cache = JSON.parse(str);
-                        this.node.fs.writeFileSync(fpath, str, {
-                            flag: 'w',
-                        });
-                        if (!isPlainObject(this.cache))
-                            throw new Error('Invalid Data');
-                    } catch (e) {
-                        this.node.fs.copyFileSync(fpath, backupPath);
-                        this.error(
-                            `Failed to parse ${fpath}: ${e.message}. Backup created at ${backupPath}`,
-                        );
-                    }
-                }
-            }
-            if (!isPlainObject(this.cache)) {
-                this.node.fs.writeFileSync(fpath, JSON.stringify({}), {
-                    flag: 'w',
-                });
+            fpath = `${this.name}.json`;
+            if (!this.node.fs.existsSync(fpath)) {
+                this.node.fs.writeFileSync(
+                    fpath,
+                    JSON.stringify({}),
+                    { flag: 'wx' },
+                    (err) => console.log(err),
+                );
                 this.cache = {};
+            } else {
+                this.cache = JSON.parse(
+                    this.node.fs.readFileSync(`${this.name}.json`),
+                );
             }
         }
     }
@@ -158,19 +83,15 @@ export class OpenAPI {
         const data = JSON.stringify(this.cache, null, 2);
         if (isQX) $prefs.setValueForKey(data, this.name);
         if (isLoon || isSurge) $persistentStore.write(data, this.name);
-        if (isGUIforCores) $Plugins.SubStoreCache.set(this.name, data);
         if (isNode) {
-            const basePath =
-                eval('process.env.SUB_STORE_DATA_BASE_PATH') || '.';
-
             this.node.fs.writeFileSync(
-                `${basePath}/${this.name}.json`,
+                `${this.name}.json`,
                 data,
                 { flag: 'w' },
                 (err) => console.log(err),
             );
             this.node.fs.writeFileSync(
-                `${basePath}/root.json`,
+                'root.json',
                 JSON.stringify(this.root, null, 2),
                 { flag: 'w' },
                 (err) => console.log(err),
@@ -191,9 +112,6 @@ export class OpenAPI {
             if (isNode) {
                 this.root[key] = data;
             }
-            if (isGUIforCores) {
-                return $Plugins.SubStoreCache.set(key, data);
-            }
         } else {
             this.cache[key] = data;
         }
@@ -213,9 +131,6 @@ export class OpenAPI {
             if (isNode) {
                 return this.root[key];
             }
-            if (isGUIforCores) {
-                return $Plugins.SubStoreCache.get(key);
-            }
         } else {
             return this.cache[key];
         }
@@ -233,9 +148,6 @@ export class OpenAPI {
             }
             if (isNode) {
                 delete this.root[key];
-            }
-            if (isGUIforCores) {
-                return $Plugins.SubStoreCache.remove(key);
             }
         } else {
             delete this.cache[key];
@@ -275,68 +187,6 @@ export class OpenAPI {
                 (openURL ? `\n点击跳转: ${openURL}` : '') +
                 (mediaURL ? `\n多媒体: ${mediaURL}` : '');
             console.log(`${title}\n${subtitle}\n${content_}\n\n`);
-
-            let push = eval('process.env.SUB_STORE_PUSH_SERVICE');
-            if (push) {
-                if (/^https?:\/\//.test(push)) {
-                    // 处理 HTTP/HTTPS URL
-                    const url = push
-                        .replace(
-                            '[推送标题]',
-                            encodeURIComponent(title || 'Sub-Store'),
-                        )
-                        .replace(
-                            '[推送内容]',
-                            encodeURIComponent(
-                                [subtitle, content_].map((i) => i).join('\n'),
-                            ),
-                        );
-                    const $http = HTTP();
-                    $http
-                        .get({ url })
-                        .then((resp) => {
-                            console.log(
-                                `[Push Service] URL: ${url}\nRES: ${resp.statusCode} ${resp.body}`,
-                            );
-                        })
-                        .catch((e) => {
-                            console.log(
-                                `[Push Service] URL: ${url}\nERROR: ${e}`,
-                            );
-                        });
-                } else {
-                    const { execFile } = eval(`require("child_process")`);
-                    execFile(
-                        'shoutrrr',
-                        [
-                            'send',
-                            '--url',
-                            push,
-                            '--message',
-                            `${title}\n${subtitle}\n${content_}`,
-                        ],
-                        (error, stdout, stderr) => {
-                            if (error) {
-                                console.log(
-                                    `[Push Service] URL: ${push}\nERROR: ${error}`,
-                                );
-                                return;
-                            }
-                            if (stderr) {
-                                console.log(
-                                    `[Push Service] URL: ${push}\nstderr: ${stderr}`,
-                                );
-                            }
-                            console.log(
-                                `[Push Service] URL: ${push}\nstdout: ${stdout}`,
-                            );
-                        },
-                    );
-                }
-            }
-        }
-        if (isGUIforCores) {
-            $Plugins.Notify(title, subtitle + '\n' + content);
         }
     }
 
@@ -358,7 +208,7 @@ export class OpenAPI {
     }
 
     done(value = {}) {
-        if (isQX || isLoon || isSurge || isGUIforCores) {
+        if (isQX || isLoon || isSurge) {
             $done(value);
         } else if (isNode) {
             if (typeof $context !== 'undefined') {
@@ -371,21 +221,11 @@ export class OpenAPI {
 }
 
 export function ENV() {
-    return {
-        isQX,
-        isLoon,
-        isSurge,
-        isNode,
-        isStash,
-        isShadowRocket,
-        isEgern,
-        isLanceX,
-        isGUIforCores,
-    };
+    return { isQX, isLoon, isSurge, isNode, isStash, isShadowRocket };
 }
 
 export function HTTP(defaultOptions = { baseURL: '' }) {
-    const { isQX, isLoon, isSurge, isNode, isGUIforCores } = ENV();
+    const { isQX, isLoon, isSurge, isNode } = ENV();
     const methods = [
         'GET',
         'POST',
@@ -417,17 +257,6 @@ export function HTTP(defaultOptions = { baseURL: '' }) {
 
         events.onRequest(method, options);
 
-        if (options.node) {
-            // Surge & Loon allow connecting to a server using a specified proxy node
-            if (isSurge) {
-                const build = $environment['surge-build'];
-                if (build && parseInt(build) >= 2407) {
-                    options['policy-descriptor'] = options.node;
-                    delete options.node;
-                }
-            }
-        }
-
         let worker;
         if (isQX) {
             worker = $task.fetch({
@@ -435,182 +264,31 @@ export function HTTP(defaultOptions = { baseURL: '' }) {
                 url: options.url,
                 headers: options.headers,
                 body: options.body,
-                opts: options.opts,
             });
         } else if (isLoon || isSurge || isNode) {
-            worker = new Promise(async (resolve, reject) => {
-                const body = options.body;
-                const opts = JSON.parse(JSON.stringify(options));
-                opts.body = body;
-                opts.timeout = opts.timeout || 8000;
-                if (opts.timeout) {
-                    opts.timeout++;
-                    if (isNaN(opts.timeout)) {
-                        opts.timeout = 8000;
-                    }
-                    if (!isNode) {
-                        let unit = 'ms';
-                        // 这些客户端单位为 s
-                        if (isSurge || isStash || isShadowRocket) {
-                            opts.timeout = Math.ceil(opts.timeout / 1000);
-                            unit = 's';
-                        }
-                        // Loon 为 ms
-                        // console.log(`[httpClient timeout] ${opts.timeout}${unit}`);
-                    }
-                }
-                if (isNode) {
-                    const undici = eval("require('undici')");
-                    const { socksDispatcher } = eval("require('fetch-socks')");
-                    const {
-                        ProxyAgent,
-                        EnvHttpProxyAgent,
-                        request,
-                        interceptors,
-                    } = undici;
-                    const agentOpts = {
-                        connect: {
-                            rejectUnauthorized:
-                                opts.strictSSL === false ||
-                                opts.insecure === true ||
-                                opts.rejectUnauthorized === false
-                                    ? false
-                                    : true,
-                        },
-                        bodyTimeout: opts.timeout,
-                        headersTimeout: opts.timeout,
-                    };
-                    const tlsOptions = {
-                        rejectUnauthorized:
-                            agentOpts.connect.rejectUnauthorized,
-                    };
-                    opts.tls = {
-                        ...(opts.tls || {}),
-                        ...tlsOptions,
-                    };
-                    try {
-                        const url = new URL(opts.url);
-                        if (url.username || url.password) {
-                            opts.headers = {
-                                ...(opts.headers || {}),
-                                Authorization: `Basic ${Buffer.from(
-                                    `${url.username || ''}:${
-                                        url.password || ''
-                                    }`,
-                                ).toString('base64')}`,
-                            };
-                        }
-                        let dispatcher;
-                        if (!opts.proxy) {
-                            const allProxy =
-                                eval('process.env.all_proxy') ||
-                                eval('process.env.ALL_PROXY');
-                            if (allProxy && /^socks5:\/\//.test(allProxy)) {
-                                opts.proxy = allProxy;
-                            }
-                        }
-                        if (opts.proxy) {
-                            if (/^socks5:\/\//.test(opts.proxy)) {
-                                dispatcher = socksDispatcher(
-                                    parseSocks5Uri(opts.proxy),
-                                    {
-                                        ...agentOpts,
-                                        requestTls: tlsOptions,
-                                    },
-                                );
-                            } else {
-                                dispatcher = new ProxyAgent({
-                                    ...agentOpts,
-                                    uri: opts.proxy,
-                                    requestTls: tlsOptions,
-                                });
-                            }
-                        } else {
-                            dispatcher = new EnvHttpProxyAgent({
-                                ...agentOpts,
-                                requestTls: tlsOptions,
+            worker = new Promise((resolve, reject) => {
+                const request = isNode
+                    ? eval("require('request')")
+                    : $httpClient;
+                request[method.toLowerCase()](
+                    options,
+                    (err, response, body) => {
+                        if (err) reject(err);
+                        else
+                            resolve({
+                                statusCode:
+                                    response.status || response.statusCode,
+                                headers: response.headers,
+                                body,
                             });
-                        }
-                        const response = await request(opts.url, {
-                            ...opts,
-                            method: method.toUpperCase(),
-                            dispatcher: dispatcher.compose(
-                                interceptors.redirect({
-                                    maxRedirections: 3,
-                                    throwOnMaxRedirects: true,
-                                }),
-                            ),
-                        });
-                        resolve({
-                            statusCode: response.statusCode,
-                            headers: response.headers,
-                            body:
-                                opts.encoding === null
-                                    ? await response.body.arrayBuffer()
-                                    : await response.body.text(),
-                        });
-                    } catch (e) {
-                        reject(e);
-                    }
-                } else {
-                    $httpClient[method.toLowerCase()](
-                        opts,
-                        (err, response, body) => {
-                            // if (err) {
-                            //     console.log(err);
-                            // } else {
-                            //     console.log({
-                            //         statusCode:
-                            //             response.status || response.statusCode,
-                            //         headers: response.headers,
-                            //         body,
-                            //     });
-                            // }
-
-                            if (err) reject(err);
-                            else
-                                resolve({
-                                    statusCode:
-                                        response.status || response.statusCode,
-                                    headers: response.headers,
-                                    body,
-                                });
-                        },
-                    );
-                }
-            });
-        } else if (isGUIforCores) {
-            worker = new Promise(async (resolve, reject) => {
-                try {
-                    const response = await $Plugins.Requests({
-                        method,
-                        url: options.url,
-                        headers: options.headers,
-                        body: options.body,
-                        autoTransformBody: false,
-                        options: {
-                            Proxy: options.proxy,
-                            Timeout: options.timeout
-                                ? options.timeout / 1000
-                                : 15,
-                        },
-                    });
-                    resolve({
-                        statusCode: response.status,
-                        headers: response.headers,
-                        body: response.body,
-                    });
-                } catch (error) {
-                    reject(error);
-                }
+                    },
+                );
             });
         }
 
         let timeoutid;
-
         const timer = timeout
             ? new Promise((_, reject) => {
-                  //   console.log(`[request timeout] ${timeout}ms`);
                   timeoutid = setTimeout(() => {
                       events.onTimeout();
                       return reject(
@@ -623,9 +301,7 @@ export function HTTP(defaultOptions = { baseURL: '' }) {
         return (
             timer
                 ? Promise.race([timer, worker]).then((res) => {
-                      if (typeof clearTimeout !== 'undefined') {
-                          clearTimeout(timeoutid);
-                      }
+                      clearTimeout(timeoutid);
                       return res;
                   })
                 : worker

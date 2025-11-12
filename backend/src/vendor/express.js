@@ -1,7 +1,8 @@
 /* eslint-disable no-undef */
 import { ENV } from './open-api';
 
-export default function express({ substore: $, port, host }) {
+export default function express({ substore: $, port }) {
+    port = port || 3000;
     const { isNode } = ENV();
     const DEFAULT_HEADERS = {
         'Content-Type': 'text/plain;charset=UTF-8',
@@ -9,7 +10,6 @@ export default function express({ substore: $, port, host }) {
         'Access-Control-Allow-Methods': 'POST,GET,OPTIONS,PATCH,PUT,DELETE',
         'Access-Control-Allow-Headers':
             'Origin, X-Requested-With, Content-Type, Accept',
-        'X-Powered-By': 'Sub-Store',
     };
 
     // node support
@@ -17,14 +17,7 @@ export default function express({ substore: $, port, host }) {
         const express_ = eval(`require("express")`);
         const bodyParser = eval(`require("body-parser")`);
         const app = express_();
-        const limit = eval('process.env.SUB_STORE_BODY_JSON_LIMIT') || '1mb';
-        $.info(`[BACKEND] body JSON limit: ${limit}`);
-        app.use(
-            bodyParser.json({
-                verify: rawBodySaver,
-                limit,
-            }),
-        );
+        app.use(bodyParser.json({ verify: rawBodySaver }));
         app.use(
             bodyParser.urlencoded({ verify: rawBodySaver, extended: true }),
         );
@@ -36,12 +29,8 @@ export default function express({ substore: $, port, host }) {
 
         // adapter
         app.start = () => {
-            app.get('*', function (req, res) {
-                res.status(404).end();
-            });
-            const listener = app.listen(port, host, () => {
-                const { address, port } = listener.address();
-                $.info(`[BACKEND] listening on ${address}:${port}`);
+            app.listen(port, () => {
+                $.info(`Express started on port: ${port}`);
             });
         };
         return app;
@@ -172,7 +161,7 @@ export default function express({ substore: $, port, host }) {
 
     function Response() {
         let statusCode = 200;
-        const { isQX, isLoon, isSurge, isGUIforCores } = ENV();
+        const { isQX, isLoon, isSurge } = ENV();
         const headers = DEFAULT_HEADERS;
         const STATUS_CODE_MAP = {
             200: 'HTTP/1.1 200 OK',
@@ -195,7 +184,7 @@ export default function express({ substore: $, port, host }) {
                     body,
                     headers,
                 };
-                if (isQX || isGUIforCores) {
+                if (isQX) {
                     $done(response);
                 } else if (isLoon || isSurge) {
                     $done({
@@ -270,7 +259,7 @@ function extractURL(url) {
         let hashes = url.slice(url.indexOf('?') + 1).split('&');
         for (let i = 0; i < hashes.length; i++) {
             const hash = hashes[i].split('=');
-            query[hash[0]] = decodeURIComponent(hash[1]);
+            query[hash[0]] = hash[1];
         }
     }
     return {
@@ -294,7 +283,7 @@ function extractPathParams(pattern, path) {
                 while (path[j] !== '/' && j < path.length) {
                     val.push(path[j++]);
                 }
-                params[key.join('')] = decodeURIComponent(val.join(''));
+                params[key.join('')] = val.join('');
             } else {
                 if (pattern[i] !== path[j]) {
                     return null;

@@ -9,9 +9,7 @@ const RULE_TYPES_MAPPING = [
     [/^(IN|SRC)-PORT$/, 'IN-PORT'],
     [/^PROTOCOL$/, 'PROTOCOL'],
     [/^IP-CIDR$/i, 'IP-CIDR'],
-    [/^(IP-CIDR6|ip6-cidr|IP6-CIDR)$/, 'IP-CIDR6'],
-    [/^GEOIP$/i, 'GEOIP'],
-    [/^GEOSITE$/i, 'GEOSITE'],
+    [/^(IP-CIDR6|ip6-cidr|IP6-CIDR)$/],
 ];
 
 function AllRuleParser() {
@@ -39,7 +37,8 @@ function AllRuleParser() {
                             content: params[1],
                         };
                         if (
-                            ['IP-CIDR', 'IP-CIDR6', 'GEOIP'].includes(rule.type)
+                            rule.type === 'IP-CIDR' ||
+                            rule.type === 'IP-CIDR6'
                         ) {
                             rule.options = params.slice(2);
                         }
@@ -48,7 +47,7 @@ function AllRuleParser() {
                 }
                 if (!matched) throw new Error('Invalid rule type: ' + rawType);
             } catch (e) {
-                console.log(`Failed to parse line: ${line}\n Reason: ${e}`);
+                console.error(`Failed to parse line: ${line}\n Reason: ${e}`);
             }
         }
         return result;

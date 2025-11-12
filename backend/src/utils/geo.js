@@ -1,124 +1,3 @@
-import $ from '@/core/app';
-
-const ISOFlags = {
-    '🏳️‍🌈': ['EXP', 'BAND'],
-    '🇸🇱': ['TEST', 'SOS'],
-    '🇦🇩': ['AD', 'AND'],
-    '🇦🇪': ['AE', 'ARE'],
-    '🇦🇫': ['AF', 'AFG'],
-    '🇦🇱': ['AL', 'ALB'],
-    '🇦🇲': ['AM', 'ARM'],
-    '🇦🇷': ['AR', 'ARG'],
-    '🇦🇹': ['AT', 'AUT'],
-    '🇦🇺': ['AU', 'AUS'],
-    '🇦🇿': ['AZ', 'AZE'],
-    '🇧🇦': ['BA', 'BIH'],
-    '🇧🇩': ['BD', 'BGD'],
-    '🇧🇪': ['BE', 'BEL'],
-    '🇧🇬': ['BG', 'BGR'],
-    '🇧🇭': ['BH', 'BHR'],
-    '🇧🇴': ['BO', 'BOL'],
-    '🇧🇳': ['BN', 'BRN'],
-    '🇧🇷': ['BR', 'BRA'],
-    '🇧🇹': ['BT', 'BTN'],
-    '🇧🇾': ['BY', 'BLR'],
-    '🇨🇦': ['CA', 'CAN'],
-    '🇨🇭': ['CH', 'CHE'],
-    '🇨🇱': ['CL', 'CHL'],
-    '🇨🇴': ['CO', 'COL'],
-    '🇨🇷': ['CR', 'CRI'],
-    '🇨🇾': ['CY', 'CYP'],
-    '🇨🇿': ['CZ', 'CZE'],
-    '🇩🇪': ['DE', 'DEU'],
-    '🇩🇰': ['DK', 'DNK'],
-    // 新增阿尔及利亚 ISO 代码
-    '🇩🇿': ['DZ', 'DZA'],
-    '🇪🇨': ['EC', 'ECU'],
-    '🇪🇪': ['EE', 'EST'],
-    '🇪🇬': ['EG', 'EGY'],
-    '🇪🇸': ['ES', 'ESP'],
-    '🇪🇺': ['EU'],
-    '🇫🇮': ['FI', 'FIN'],
-    '🇫🇷': ['FR', 'FRA'],
-    '🇬🇧': ['GB', 'GBR', 'UK'],
-    '🇬🇪': ['GE', 'GEO'],
-    '🇬🇷': ['GR', 'GRC'],
-    '🇬🇹': ['GT', 'GTM'],
-    '🇬🇺': ['GU', 'GUM'],
-    '🇭🇰': ['HK', 'HKG', 'HKT', 'HKBN', 'HGC', 'WTT', 'CMI'],
-    '🇭🇷': ['HR', 'HRV'],
-    '🇭🇺': ['HU', 'HUN'],
-    '🇮🇶': ['IQ', 'IRQ'], // 伊拉克
-    '🇯🇴': ['JO', 'JOR'],
-    '🇯🇵': ['JP', 'JPN', 'TYO'],
-    '🇰🇪': ['KE', 'KEN'],
-    '🇰🇬': ['KG', 'KGZ'],
-    '🇰🇭': ['KH', 'KGZ'],
-    '🇰🇵': ['KP', 'PRK'],
-    '🇰🇷': ['KR', 'KOR', 'SEL'],
-    '🇰🇿': ['KZ', 'KAZ'],
-    '🇮🇩': ['ID', 'IDN'],
-    '🇮🇪': ['IE', 'IRL'],
-    '🇮🇱': ['IL', 'ISR'],
-    '🇮🇲': ['IM', 'IMN'],
-    '🇮🇳': ['IN', 'IND'],
-    '🇮🇷': ['IR', 'IRN'],
-    '🇮🇸': ['IS', 'ISL'],
-    '🇮🇹': ['IT', 'ITA'],
-    '🇱🇦': ['LA', 'LAO'],
-    '🇱🇰': ['LK', 'LKA'],
-    '🇱🇹': ['LT', 'LTU'],
-    '🇱🇺': ['LU', 'LUX'],
-    '🇱🇻': ['LV', 'LVA'],
-    '🇲🇦': ['MA', 'MAR'],
-    '🇲🇩': ['MD', 'MDA'],
-    '🇳🇬': ['NG', 'NGA'],
-    '🇲🇲': ['MM', 'MMR'],
-    '🇲🇰': ['MK', 'MKD'],
-    '🇲🇳': ['MN', 'MNG'],
-    '🇲🇴': ['MO', 'MAC', 'CTM'],
-    '🇲🇹': ['MT', 'MLT'],
-    '🇲🇽': ['MX', 'MEX'],
-    '🇲🇾': ['MY', 'MYS'],
-    '🇳🇱': ['NL', 'NLD', 'AMS'],
-    '🇳🇴': ['NO', 'NOR'],
-    '🇳🇵': ['NP', 'NPL'],
-    '🇳🇿': ['NZ', 'NZL'],
-    '🇵🇦': ['PA', 'PAN'],
-    '🇵🇪': ['PE', 'PER'],
-    '🇵🇭': ['PH', 'PHL'],
-    '🇵🇰': ['PK', 'PAK'],
-    '🇵🇱': ['PL', 'POL'],
-    '🇵🇷': ['PR', 'PRI'],
-    '🇵🇹': ['PT', 'PRT'],
-    '🇵🇾': ['PY', 'PRY'],
-    '🇵🇬': ['PG', 'PNG'],
-    '🇶🇦': ['QA', 'QAT'],
-    '🇷🇴': ['RO', 'ROU'],
-    '🇷🇸': ['RS', 'SRB'],
-    '🇷🇪': ['RE', 'REU'],
-    '🇷🇺': ['RU', 'RUS'],
-    '🇸🇦': ['SA', 'SAU'],
-    '🇼🇸': ['WS', 'WSM'],
-    '🇸🇪': ['SE', 'SWE'],
-    '🇸🇬': ['SG', 'SGP'],
-    '🇸🇮': ['SI', 'SVN'],
-    '🇸🇰': ['SK', 'SVK'],
-    '🇹🇬': ['TG', 'TGO'], // 多哥
-    '🇹🇭': ['TH', 'THA'],
-    '🇹🇳': ['TN', 'TUN'],
-    '🇹🇷': ['TR', 'TUR'],
-    '🇹🇼': ['TW', 'TWN', 'CHT', 'HINET', 'ROC'],
-    '🇺🇦': ['UA', 'UKR'],
-    '🇺🇸': ['US', 'USA', 'LAX', 'SFO', 'SJC'],
-    '🇺🇾': ['UY', 'URY'],
-    // 新增 梵蒂冈 ISO 代码
-    '🇻🇦': ['VA', 'VAT'],
-    '🇻🇪': ['VE', 'VEN'],
-    '🇻🇳': ['VN', 'VNM'],
-    '🇿🇦': ['ZA', 'ZAF', 'JNB'],
-    '🇨🇳': ['CN', 'CHN', 'BACK'],
-};
 // get proxy flag according to its name
 export function getFlag(name) {
     // flags from @KOP-XIAO: https://github.com/KOP-XIAO/QuantumultX/blob/master/Scripts/resource-parser.js
@@ -130,14 +9,12 @@ export function getFlag(name) {
         '🏳️‍🌈': ['流量', '时间', '过期', 'Bandwidth', 'Expire'],
         '🇸🇱': ['应急', '测试节点'],
         '🇦🇩': ['Andorra', '安道尔'],
-        // 新增 Dubai 英文匹配
-        '🇦🇪': ['United Arab Emirates', '阿联酋', '迪拜', 'Dubai'],
+        '🇦🇪': ['United Arab Emirates', '阿联酋', '迪拜'],
         '🇦🇫': ['Afghanistan', '阿富汗'],
         '🇦🇱': ['Albania', '阿尔巴尼亚', '阿爾巴尼亞'],
         '🇦🇲': ['Armenia', '亚美尼亚'],
         '🇦🇷': ['Argentina', '阿根廷'],
         '🇦🇹': ['Austria', '奥地利', '奧地利', '维也纳'],
-        '🇼🇸': ['Samoa', '萨摩亚', '薩摩亞'],
         '🇦🇺': [
             'Australia',
             '澳大利亚',
@@ -159,10 +36,7 @@ export function getFlag(name) {
         '🇧🇬': ['Bulgaria', '保加利亚', '保加利亞'],
         '🇧🇭': ['Bahrain', '巴林'],
         '🇧🇷': ['Brazil', '巴西', '圣保罗'],
-        '🇧🇳': ['Brunei', '文莱', '汶萊'],
         '🇧🇾': ['Belarus', '白俄罗斯', '白俄'],
-        '🇧🇴': ['Bolivia', '玻利维亚'],
-        '🇧🇹': ['Bhutan', '不丹', '不丹王国'],
         '🇨🇦': [
             'Canada',
             '加拿大',
@@ -173,15 +47,13 @@ export function getFlag(name) {
             '滑铁卢',
             '多伦多',
             'Waterloo',
-            'Toronto',
         ],
         '🇨🇭': ['Switzerland', '瑞士', '苏黎世', 'Zurich'],
         '🇨🇱': ['Chile', '智利'],
         '🇨🇴': ['Colombia', '哥伦比亚'],
         '🇨🇷': ['Costa Rica', '哥斯达黎加'],
         '🇨🇾': ['Cyprus', '塞浦路斯'],
-        // 补充 Czech / Czech Republic 匹配
-        '🇨🇿': ['Czechia', '捷克', 'Czech', 'Czech Republic'],
+        '🇨🇿': ['Czechia', '捷克'],
         '🇩🇪': [
             'German',
             '德国',
@@ -193,11 +65,8 @@ export function getFlag(name) {
             '广德',
             '法兰克福',
             'Frankfurt',
-            '德意志',
         ],
         '🇩🇰': ['Denmark', '丹麦', '丹麥'],
-        // 新增 阿尔及利亚
-        '🇩🇿': ['Algeria', '阿尔及利亚', '阿爾及利亞'],
         '🇪🇨': ['Ecuador', '厄瓜多尔'],
         '🇪🇪': ['Estonia', '爱沙尼亚'],
         '🇪🇬': ['Egypt', '埃及'],
@@ -216,8 +85,6 @@ export function getFlag(name) {
         ],
         '🇬🇪': ['Georgia', '格鲁吉亚', '格魯吉亞'],
         '🇬🇷': ['Greece', '希腊', '希臘'],
-        '🇬🇺': ['Guam', '关岛', '關島'],
-        '🇬🇹': ['Guatemala', '危地马拉'],
         '🇭🇰': [
             'Hongkong',
             '香港',
@@ -233,7 +100,6 @@ export function getFlag(name) {
         ],
         '🇭🇷': ['Croatia', '克罗地亚', '克羅地亞'],
         '🇭🇺': ['Hungary', '匈牙利'],
-        '🇮🇶': ['Iraq', '伊拉克', '巴格达', 'Baghdad'], // 伊拉克
         '🇯🇴': ['Jordan', '约旦'],
         '🇯🇵': [
             'Japan',
@@ -274,33 +140,23 @@ export function getFlag(name) {
         '🇮🇪': ['Ireland', '爱尔兰', '愛爾蘭', '都柏林'],
         '🇮🇱': ['Israel', '以色列'],
         '🇮🇲': ['Isle of Man', '马恩岛', '馬恩島'],
-        '🇮🇳': ['India', '印度', '孟买', 'MFumbai', 'Mumbai'],
+        '🇮🇳': ['India', '印度', '孟买', 'MFumbai'],
         '🇮🇷': ['Iran', '伊朗'],
         '🇮🇸': ['Iceland', '冰岛', '冰島'],
         '🇮🇹': ['Italy', '意大利', '義大利', '米兰', 'Nachash'],
-        '🇱🇰': ['Sri Lanka', '斯里兰卡', '斯里蘭卡'],
-        '🇱🇦': ['Laos', '老挝', '老撾'],
         '🇱🇹': ['Lithuania', '立陶宛'],
         '🇱🇺': ['Luxembourg', '卢森堡'],
         '🇱🇻': ['Latvia', '拉脱维亚', 'Latvija'],
         '🇲🇦': ['Morocco', '摩洛哥'],
         '🇲🇩': ['Moldova', '摩尔多瓦', '摩爾多瓦'],
-        '🇲🇲': ['Myanmar', '缅甸', '緬甸'],
         '🇳🇬': ['Nigeria', '尼日利亚', '尼日利亞'],
         '🇲🇰': ['Macedonia', '马其顿', '馬其頓'],
         '🇲🇳': ['Mongolia', '蒙古'],
         '🇲🇴': ['Macao', '澳门', '澳門', 'CTM'],
         '🇲🇹': ['Malta', '马耳他'],
         '🇲🇽': ['Mexico', '墨西哥'],
-        '🇲🇾': ['Malaysia', '马来', '馬來', '吉隆坡', '大馬'],
-        '🇳🇱': [
-            'Netherlands',
-            '荷兰',
-            '荷蘭',
-            '尼德蘭',
-            '阿姆斯特丹',
-            'Amsterdam',
-        ],
+        '🇲🇾': ['Malaysia', '马来西亚', '馬來西亞', '吉隆坡', '大馬'],
+        '🇳🇱': ['Netherlands', '荷兰', '荷蘭', '尼德蘭', '阿姆斯特丹'],
         '🇳🇴': ['Norway', '挪威'],
         '🇳🇵': ['Nepal', '尼泊尔'],
         '🇳🇿': ['New Zealand', '新西兰', '新西蘭'],
@@ -308,12 +164,10 @@ export function getFlag(name) {
         '🇵🇪': ['Peru', '秘鲁', '祕魯'],
         '🇵🇭': ['Philippines', '菲律宾', '菲律賓'],
         '🇵🇰': ['Pakistan', '巴基斯坦'],
-        '🇵🇱': ['Poland', '波兰', '波蘭', '华沙', 'Warsaw'],
+        '🇵🇱': ['Poland', '波兰', '波蘭'],
         '🇵🇷': ['Puerto Rico', '波多黎各'],
         '🇵🇹': ['Portugal', '葡萄牙'],
-        '🇵🇬': ['Papua New Guinea', '巴布亚新几内亚'],
         '🇵🇾': ['Paraguay', '巴拉圭'],
-        '🇶🇦': ['Qatar', '卡塔尔', '卡塔爾'],
         '🇷🇴': ['Romania', '罗马尼亚'],
         '🇷🇸': ['Serbia', '塞尔维亚'],
         '🇷🇪': ['Réunion', '留尼汪', '法属留尼汪'],
@@ -334,8 +188,8 @@ export function getFlag(name) {
             '沪俄',
             'Moscow',
         ],
-        '🇸🇦': ['Saudi', '沙特阿拉伯', '沙特', 'Riyadh', '利雅得'],
-        '🇸🇪': ['Sweden', '瑞典', '斯德哥尔摩', 'Stockholm'],
+        '🇸🇦': ['Saudi', '沙特阿拉伯', '沙特'],
+        '🇸🇪': ['Sweden', '瑞典'],
         '🇸🇬': [
             'Singapore',
             '新加坡',
@@ -353,25 +207,18 @@ export function getFlag(name) {
         ],
         '🇸🇮': ['Slovenia', '斯洛文尼亚'],
         '🇸🇰': ['Slovakia', '斯洛伐克'],
-        '🇹🇬': ['Togo', '多哥', '洛美', 'Lomé', 'Lome'], // 多哥
         '🇹🇭': ['Thailand', '泰国', '泰國', '曼谷'],
         '🇹🇳': ['Tunisia', '突尼斯'],
-        '🇹🇷': ['Turkey', '土耳其', '伊斯坦布尔', 'Istanbul'],
+        '🇹🇷': ['Turkey', '土耳其', '伊斯坦布尔'],
         '🇹🇼': [
             'Taiwan',
             '台湾',
-            '臺灣',
-            '台灣',
-            '中華民國',
-            '中华民国',
             '台北',
             '台中',
             '新北',
             '彰化',
             '台',
-            '臺',
             'Taipei',
-            'Tai Wan',
         ],
         '🇺🇦': ['Ukraine', '乌克兰', '烏克蘭'],
         '🇺🇸': [
@@ -383,7 +230,6 @@ export function getFlag(name) {
             '波特兰',
             '达拉斯',
             '俄勒冈',
-            'Oregon',
             '凤凰城',
             '费利蒙',
             '硅谷',
@@ -397,21 +243,12 @@ export function getFlag(name) {
             '沪美',
             '哥伦布',
             '纽约',
-            'New York',
             'Los Angeles',
             'San Jose',
             'Sillicon Valley',
             'Michigan',
-            '俄亥俄',
-            'Ohio',
-            '马纳萨斯',
-            'Manassas',
-            '弗吉尼亚',
-            'Virginia',
         ],
         '🇺🇾': ['Uruguay', '乌拉圭'],
-        // 新增 梵蒂冈 及别名
-        '🇻🇦': ['Vatican', 'Vatican City', 'Holy See', '梵蒂冈', '梵蒂岡'],
         '🇻🇪': ['Venezuela', '委内瑞拉'],
         '🇻🇳': ['Vietnam', '越南', '胡志明'],
         '🇿🇦': ['South Africa', '南非'],
@@ -441,6 +278,108 @@ export function getFlag(name) {
         ],
     };
 
+    const ISOFlags = {
+        '🏳️‍🌈': ['EXP', 'BAND'],
+        '🇸🇱': ['TEST', 'SOS'],
+        '🇦🇩': ['AD', 'AND'],
+        '🇦🇪': ['AE', 'ARE'],
+        '🇦🇫': ['AF', 'AFG'],
+        '🇦🇱': ['AL', 'ALB'],
+        '🇦🇲': ['AM', 'ARM'],
+        '🇦🇷': ['AR', 'ARG'],
+        '🇦🇹': ['AT', 'AUT'],
+        '🇦🇺': ['AU', 'AUS'],
+        '🇦🇿': ['AZ', 'AZE'],
+        '🇧🇦': ['BA', 'BIH'],
+        '🇧🇩': ['BD', 'BGD'],
+        '🇧🇪': ['BE', 'BEL'],
+        '🇧🇬': ['BG', 'BGR'],
+        '🇧🇭': ['BH', 'BHR'],
+        '🇧🇷': ['BR', 'BRA'],
+        '🇧🇾': ['BY', 'BLR'],
+        '🇨🇦': ['CA', 'CAN'],
+        '🇨🇭': ['CH', 'CHE'],
+        '🇨🇱': ['CL', 'CHL'],
+        '🇨🇴': ['CO', 'COL'],
+        '🇨🇷': ['CR', 'CRI'],
+        '🇨🇾': ['CY', 'CYP'],
+        '🇨🇿': ['CZ', 'CZE'],
+        '🇩🇪': ['DE', 'DEU'],
+        '🇩🇰': ['DK', 'DNK'],
+        '🇪🇨': ['EC', 'ECU'],
+        '🇪🇪': ['EE', 'EST'],
+        '🇪🇬': ['EG', 'EGY'],
+        '🇪🇸': ['ES', 'ESP'],
+        '🇪🇺': ['EU'],
+        '🇫🇮': ['FI', 'FIN'],
+        '🇫🇷': ['FR', 'FRA'],
+        '🇬🇧': ['GB', 'GBR', 'UK'],
+        '🇬🇪': ['GE', 'GEO'],
+        '🇬🇷': ['GR', 'GRC'],
+        '🇭🇰': ['HK', 'HKG', 'HKT', 'HKBN', 'HGC', 'WTT', 'CMI'],
+        '🇭🇷': ['HR', 'HRV'],
+        '🇭🇺': ['HU', 'HUN'],
+        '🇯🇴': ['JO', 'JOR'],
+        '🇯🇵': ['JP', 'JPN'],
+        '🇰🇪': ['KE', 'KEN'],
+        '🇰🇬': ['KG', 'KGZ'],
+        '🇰🇭': ['KH', 'KGZ'],
+        '🇰🇵': ['KP', 'PRK'],
+        '🇰🇷': ['KR', 'KOR'],
+        '🇰🇿': ['KZ', 'KAZ'],
+        '🇮🇩': ['ID', 'IDN'],
+        '🇮🇪': ['IE', 'IRL'],
+        '🇮🇱': ['IL', 'ISR'],
+        '🇮🇲': ['IM', 'IMN'],
+        '🇮🇳': ['IN', 'IND'],
+        '🇮🇷': ['IR', 'IRN'],
+        '🇮🇸': ['IS', 'ISL'],
+        '🇮🇹': ['IT', 'ITA'],
+        '🇱🇹': ['LT', 'LTU'],
+        '🇱🇺': ['LU', 'LUX'],
+        '🇱🇻': ['LV', 'LVA'],
+        '🇲🇦': ['MA', 'MAR'],
+        '🇲🇩': ['MD', 'MDA'],
+        '🇳🇬': ['NG', 'NGA'],
+        '🇲🇰': ['MK', 'MKD'],
+        '🇲🇳': ['MN', 'MNG'],
+        '🇲🇴': ['MO', 'MAC', 'CTM'],
+        '🇲🇹': ['MT', 'MLT'],
+        '🇲🇽': ['MX', 'MEX'],
+        '🇲🇾': ['MY', 'MYS'],
+        '🇳🇱': ['NL', 'NLD'],
+        '🇳🇴': ['NO', 'NOR'],
+        '🇳🇵': ['NP', 'NPL'],
+        '🇳🇿': ['NZ', 'NZL'],
+        '🇵🇦': ['PA', 'PAN'],
+        '🇵🇪': ['PE', 'PER'],
+        '🇵🇭': ['PH', 'PHL'],
+        '🇵🇰': ['PK', 'PAK'],
+        '🇵🇱': ['PL', 'POL'],
+        '🇵🇷': ['PR', 'PRI'],
+        '🇵🇹': ['PT', 'PRT'],
+        '🇵🇾': ['PY', 'PRY'],
+        '🇷🇴': ['RO', 'ROU'],
+        '🇷🇸': ['RS', 'SRB'],
+        '🇷🇪': ['RE', 'REU'],
+        '🇷🇺': ['RU', 'RUS'],
+        '🇸🇦': ['SA', 'SAU'],
+        '🇸🇪': ['SE', 'SWE'],
+        '🇸🇬': ['SG', 'SGP'],
+        '🇸🇮': ['SI', 'SVN'],
+        '🇸🇰': ['SK', 'SVK'],
+        '🇹🇭': ['TH', 'THA'],
+        '🇹🇳': ['TN', 'TUN'],
+        '🇹🇷': ['TR', 'TUR'],
+        '🇹🇼': ['TW', 'TWN', 'CHT', 'HINET'],
+        '🇺🇦': ['UA', 'UKR'],
+        '🇺🇸': ['US', 'USA', 'LAX', 'SFO'],
+        '🇺🇾': ['UY', 'URY'],
+        '🇻🇪': ['VE', 'VEN'],
+        '🇻🇳': ['VN', 'VNM'],
+        '🇿🇦': ['ZA', 'ZAF'],
+        '🇨🇳': ['CN', 'CHN', 'BACK'],
+    };
     // 原旗帜或空
     let Flag =
         name.match(/[\uD83C][\uDDE6-\uDDFF][\uD83C][\uDDE6-\uDDFF]/)?.[0] ||
@@ -454,9 +393,7 @@ export function getFlag(name) {
             // 不精确匹配（只要包含就算,忽略大小写)
             keywords.some((keyword) => RegExp(`${keyword}`, 'i').test(name))
         ) {
-            if (/内蒙古/.test(name) && ['🇲🇳'].includes(flag)) {
-                return (Flag = '🇨🇳');
-            }
+            //console.log(`newFlag = ${flag}`)
             return (Flag = flag);
         }
     }
@@ -470,67 +407,10 @@ export function getFlag(name) {
                 RegExp(`(^|[^a-zA-Z])${keyword}([^a-zA-Z]|$)`).test(name),
             )
         ) {
-            const isCN2 =
-                flag == '🇨🇳' &&
-                RegExp(`(^|[^a-zA-Z])CN2([^a-zA-Z]|$)`).test(name);
-            if (!isCN2) {
-                return (Flag = flag);
-            }
+            //console.log(`ISOFlag = ${flag}`)
+            return (Flag = flag);
         }
     }
-
     //console.log(`Final Flag = ${Flag}`)
     return Flag;
-}
-
-export function getISO(name) {
-    return ISOFlags[getFlag(name)]?.[0];
-}
-
-// remove flag
-export function removeFlag(str) {
-    return str
-        .replace(/[\uD83C][\uDDE6-\uDDFF][\uD83C][\uDDE6-\uDDFF]|🏴‍☠️|🏳️‍🌈/g, '')
-        .trim();
-}
-
-export class MMDB {
-    constructor({ country, asn } = {}) {
-        if ($.env.isNode) {
-            const Reader = eval(`require("@maxmind/geoip2-node")`).Reader;
-            const fs = eval("require('fs')");
-            const countryFile =
-                country || eval('process.env.SUB_STORE_MMDB_COUNTRY_PATH');
-            const asnFile = asn || eval('process.env.SUB_STORE_MMDB_ASN_PATH');
-            // $.info(
-            //     `GeoLite2 Country MMDB: ${countryFile}, exists: ${fs.existsSync(
-            //         countryFile,
-            //     )}`,
-            // );
-            if (countryFile) {
-                this.countryReader = Reader.openBuffer(
-                    fs.readFileSync(countryFile),
-                );
-            }
-            // $.info(
-            //     `GeoLite2 ASN MMDB: ${asnFile}, exists: ${fs.existsSync(
-            //         asnFile,
-            //     )}`,
-            // );
-            if (asnFile) {
-                if (!fs.existsSync(asnFile))
-                    throw new Error('GeoLite2 ASN MMDB does not exist');
-                this.asnReader = Reader.openBuffer(fs.readFileSync(asnFile));
-            }
-        }
-    }
-    geoip(ip) {
-        return this.countryReader?.country(ip)?.country?.isoCode;
-    }
-    ipaso(ip) {
-        return this.asnReader?.asn(ip)?.autonomousSystemOrganization;
-    }
-    ipasn(ip) {
-        return this.asnReader?.asn(ip)?.autonomousSystemNumber;
-    }
 }
